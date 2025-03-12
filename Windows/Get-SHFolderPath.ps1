@@ -12,7 +12,7 @@ function Get-SHFolderPath {
         Test-MyTestFunction -Verbose
         Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
     #>
-    [cmdletbindings()]
+    [cmdletbinding()]
     param(
         [guid] $FolderGUID
     )

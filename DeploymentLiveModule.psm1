@@ -19,16 +19,16 @@ param()
     
     $FunctionList = @()
 
-    get-childitem $ScriptDir -directory -exclude *.ignore |
-        get-childitem -recurse -exclude *.tests.ps1,*.templates.ps1 | 
-        foreach-object { 
-            write-host "Import Script: $($_.FullName)"
-            if ( -not $_.Name.EndsWith('.private.ps1' ) ) {
-                $FunctionList += $_.BaseName
+    foreach ( $Directory in get-childitem $ScriptDir -directory -exclude $Exclude ) {
+        foreach ( $File in get-childitem -path "$Directory\*.ps1" -recurse -exclude *.tests.ps1,*.templates.ps1) {
+            write-verbose "Import Script: $($File.FullName)"
+            if ( -not $File.Name.EndsWith('.private.ps1' ) ) {
+                $FunctionList += $File.BaseName
             }
-            . $_.FullName | out-null
+            . $File.FullName | out-null
         }
+    }    
 
-$FunctionList | Write-host
+$FunctionList -join " " | Write-Verbose
 Export-ModuleMember -Function $FunctionList -Alias *
 
