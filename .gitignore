@@ -1,0 +1,4 @@
+_InProgress.ignore/*
+DeploymentLive/*
+*.future.ps1
+

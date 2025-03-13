@@ -50,7 +50,7 @@ foreach ( $Directory in get-childitem $ScriptDir -directory -exclude $Exclude ) 
 
     $Sb.AppendLine("`r`n#Region $($Directory.BaseName)`r`n") | write-verbose
 
-    foreach ( $File in get-childitem -path "$Directory\*.ps1" -recurse -exclude *.tests.ps1,*.templates.ps1) {
+    foreach ( $File in get-childitem -path "$Directory\*.ps1" -recurse -exclude *.tests.ps1,*.templates.ps1,*.future.ps1) {
         write-verbose "Import Script: $($File.FullName)"
         if ( -not $File.Name.EndsWith('.private.ps1' ) ) {
             $FunctionList += $File.BaseName
