@@ -36,8 +36,8 @@ function Find-LocalFile {
     if ( $CommonLocation -ne $null ) {
         $Path = Invoke-command -ScriptBlock $CommonLocation
         if ( test-path $Path ) { 
-            write-verbose "Found ScriptBlock [$Name] = $Data"
-            return $Data
+            write-verbose "Found ScriptBlock [$Name] = $Path"
+            return $Path
         }
     }
 
@@ -45,10 +45,10 @@ function Find-LocalFile {
 
     #region Serach the path
 
-    $Found = get-command -Name ( split-path -leaf $Name )
+    $Path = get-command -Name ( split-path -leaf $Name )
     if ( $Found ) { 
-        write-verbose "Found Command in Path [$Name] = $Data"
-        return $Data
+        write-verbose "Found Command in Path [$Name] = $Path"
+        return $Path
     }
 
     #endregion 

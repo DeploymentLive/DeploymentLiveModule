@@ -14,7 +14,7 @@ function Invoke-SignTool {
     #>
     [cmdletbinding()]
     param(
-        [string] $Cert = 'cert:\*',
+                 $Cert,
         [string] $Path,
         [string] $Dest
     )
@@ -27,13 +27,20 @@ function Invoke-SignTool {
 
     #region Find Signing Key
 
-    # Just return the Cert object from the Cert: Store.
-    $cert = get-childitem $Cert -CodeSigningCert -recurse | Select-object -first 1
+    if ( $Cert -isnot [System.Security.Cryptography.X509Certificates.X509Certificate2] ) {
+        # Just return the Cert object from the Cert: Store.
+        $Cert = get-childitem cert:\* -CodeSigningCert -recurse | Select-object -first 1
+    }
 
     #endregion
 
-    $NewFiles = Copy-Item @PSBoundParameters -force -PassThru | Foreach-object FullName
+    if ( $Dest -eq $null ) {
+        $newFiles = get-item $Path | Foreach-object FullName
+    }
+    else {
+        $NewFiles = Copy-Item -path $path -dest $dest -force -PassThru | Foreach-object FullName
+    }
     write-verbose "SignToolexe Sign /v /td sha256 /fd sha256 /sha1 $($Cert.Thumbprint) /t http://timestamp.digicert.com $($NewFiles -join ' ')"
-    & $SignTool Sign /v /td sha256 /fd sha256 /sha1 $Cert.Thumbprint /t http://timestamp.digicert.com $NewFiles
+    & $SignTool Sign /v /td sha256 /fd sha256 /sha1 $Cert.Thumbprint /tr http://timestamp.digicert.com $NewFiles
 
 }
