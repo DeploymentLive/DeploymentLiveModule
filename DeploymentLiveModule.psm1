@@ -13,7 +13,7 @@
 
 [CmdletBinding()]
 param(
-    [string[]] $Exclude = @('*.ignore','DeploymentLive','.vscode')
+    [string[]] $Exclude = @('_notes','_Release','.vscode')
 )
 
     $ScriptDir = '.'

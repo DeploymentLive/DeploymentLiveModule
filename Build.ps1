@@ -8,38 +8,62 @@
     * Script Info.
     * Within a single file for easy signing.
 .NOTES
-    Information or caveats about the function e.g. 'This function is not supported in Linux'
-.LINK
-    Specify a URI to a help page, this will show when Get-Help -Online is used.
-.EXAMPLE
-    Test-MyTestFunction -Verbose
-    Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
+    Check the .\Version.clixml for the right version information
+        <MajorVersionNumber>.<Year><Month>.<Date><Hour>.<BuildNumber>
 #>
 
 [cmdletbinding()]
 param(
-    [string[]] $Exclude = @('*.ignore','DeploymentLive','.vscode')
+    [string[]] $Exclude = @('_notes','_release','.vscode'),
+    [string] $ReleaseNotes,
+    [string[]] $Tags
 )
 
 $ScriptDir = '.'
 if ( $PSScriptRoot -ne $null ) { $ScriptDir = $PSScriptRoot }
 $sb = New-Object System.Text.StringBuilder
 
+import-module $Scriptdir\DeploymentLiveModule.psm1 -force
+
+#Region Update Version Number
+
+$Oldversion = import-clixml "$ScriptDir\Version.clixml"
+$YearMonth = ([datetime]::now.year -2000) * 100 + [datetime]::now.month
+$DayHour = ([datetime]::now.day) * 100 + [datetime]::now.hour
+$NewVersion = [version]::new($OldVersion.Major,$YearMonth,$DayHour,$OldVersion.revision + 1)
+$NewVersion | Export-Clixml "$ScriptDir\Version.clixml"
+$NewVersion | write-verbose
+
+#endregion
+
 #region Create Header
 
-$ModuleVersion = '1.2.3.4'
+$Description = @"
+    Common routines required by various Deployment Live scripts.
+.SYNOPSIS
+    Deployment Live Common PowerShell Module.
+.NOTES
+    Although this module is avaiable with each function split into seperate *.ps1 files, 
+    this Module is compiled here into a single *.psm1 file for the following reasons:
+    * Makes Loading much quicker.
+    * Standardized Versioning.
+    * Makes signing easier.
+.LINK
+    https://github.com/DeploymentLive/DeploymentLiveModule
+.EXAMPLE
+    Import-Module DeploymentLive.psm1 -force
+"@
 
 $ModuleArguments = @{
     Author = "Keith Garner (KeithGa@DeploymentLive.com)"
     CompanyName  = "Deployment Live LLC" 
     Copyright = "Copyright Deployment Live LLC, all Rights Reserved."
     GUID = [GUID]'7a98a3d7-8132-4442-bc3e-ed3e731848d1'
-    Description = "DeploymentLive Common PowerShell Library"
     projectURI = 'https://github.com/DeploymentLive/DeploymentLiveModule'
     LicenseURI = 'https://opensource.org/license/mit'
 }
 
-$SB.AppendLine( (new-ScriptFileInfo @ModuleArguments  -version $ModuleVersion -force -PassThru) ) | write-verbose
+$SB.AppendLine( (new-ScriptFileInfo @ModuleArguments -Description $Description -version $NewVersion -force -PassThru) ) | write-verbose
 
 #endregion 
 
@@ -68,7 +92,7 @@ $Sb.AppendLine('Export-ModuleMember -Function $FunctionList -Alias *') | write-v
 
 #region Start Creating Files
 
-$TargetPath = "$ScriptDir\DeploymentLive"
+$TargetPath = "$ScriptDir\_Release"
 if ( -not ( test-path $TargetPath ) ) {
     new-item -ItemType Directory -Path $TargetPath -force -ErrorAction SilentlyContinue | write-verbose
 }
@@ -79,18 +103,25 @@ $sb.ToString() | out-file -Encoding ascii -FilePath "$TargetPath\DeploymentLive.
 #region Create Module Manifest
 
 $ManifestArguments  = @{
-    ModuleVersion = $ModuleVersion
+    ModuleVersion = $NewVersion
     Path = "$TargetPath\DeploymentLive.psd1"
     FunctionsToExport = '*' # $FunctionList
-     RootModule = 'DeploymentLive.psm1'
+    RootModule = 'DeploymentLive.psm1'
+    Description = "Deployment Live Common PowerShell Module"
 }
 
 New-ModuleManifest @ModuleArguments @ManifestArguments
 
 #endregion 
 
-#region Sign
+#region Full Sign
 
+$cert = get-childitem cert:\* -CodeSigningCert -recurse | where-object Issuer -match '(DigiCert)' 
 
+if ( $cert -ne $null ) {
+    write-verbose "Version $NewVersion is ready to sign for production use."
+    write-verbose "$TargetPath\DeploymentLive.psm1"
+    Invoke-SignTool -Path "$TargetPath\DeploymentLive.psm1" -Cert $Cert
+}
 
 #endregion
