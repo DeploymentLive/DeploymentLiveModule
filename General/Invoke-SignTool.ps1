@@ -14,7 +14,7 @@ function Invoke-SignTool {
     #>
     [cmdletbinding()]
     param(
-        [string] $CertHash,
+        [string] $Cert = 'cert:\*',
         [string] $Path,
         [string] $Dest
     )
@@ -28,7 +28,7 @@ function Invoke-SignTool {
     #region Find Signing Key
 
     # Just return the Cert object from the Cert: Store.
-    $cert = Find-LocalFile -Name 'CodeSigningCert' -CommonLocation { get-childitem Cert:\* -CodeSigningCert -recurse | Select-object -first 1 }
+    $cert = get-childitem $Cert -CodeSigningCert -recurse | Select-object -first 1
 
     #endregion
 
