@@ -34,7 +34,7 @@ function Invoke-SignTool {
 
     #endregion
 
-    if ( $Dest -eq $null ) {
+    if ( [string]::IsNullOrEmpty($Dest) ) {
         $newFiles = get-item $Path | Foreach-object FullName
     }
     else {
