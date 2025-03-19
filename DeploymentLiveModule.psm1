@@ -12,7 +12,9 @@
 #>
 
 [CmdletBinding()]
-param()
+param(
+    [string[]] $Exclude = @('*.ignore','DeploymentLive','.vscode')
+)
 
     $ScriptDir = '.'
     if ( $PSScriptRoot -ne $null ) { $ScriptDir = $PSScriptRoot }
