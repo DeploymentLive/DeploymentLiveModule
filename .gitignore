@@ -1,4 +1,5 @@
 _InProgress.ignore/*
-DeploymentLive/*
+DeploymentLive.psd1
+DeploymentLive.psm1
 *.future.ps1
-
+Version.clixml
