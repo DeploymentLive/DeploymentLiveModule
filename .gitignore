@@ -1,5 +1,3 @@
-_InProgress.ignore/*
-DeploymentLive.psd1
-DeploymentLive.psm1
-*.future.ps1
+_Notes/*
+_Release/*
 Version.clixml
