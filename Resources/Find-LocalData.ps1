@@ -44,7 +44,7 @@ param(
         throw "Did not find [$Name] in data profiles"
     }
     else {
-        write-warning "Did not find [$Name] in data profiles"
+        write-verbose "Did not find [$Name] in data profiles"
     }
 
     #endregion 

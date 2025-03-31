@@ -22,7 +22,7 @@ function Invoke-OpenSSL {
 
     #region Find openssl
 
-    $OpenSSL = Find-LocalFile -Name "openssl.exe" -CommonLocation { (Get-ItemProperty -Path HKLM:\SOFTWARE\GitForWindows -ErrorAction SilentlyContinue ).InstallPath }
+    $OpenSSL = Find-LocalFile -Name "openssl.exe" -CommonLocation { (Get-ItemProperty -Path HKLM:\SOFTWARE\GitForWindows -ErrorAction SilentlyContinue ).InstallPath + "\usr\bin\openssl.exe" }
 
     #endregion 
 
